@@ -1,3 +1,23 @@
+#environment
+ - python2.7
+ - based on google-assistant-service
+ - snowboy is added.
+
+#How to run
+ - source env/bin/activate : virtual env activate
+ - cd assistant-sdk-python/google-assistant-sdk/googlesamples/assistant/grpc
+ - python demo_assist.py
+
+#detail
+ - demo_assist.py : main loop  (howord detect -> detector terminate -> assistant -> detector restart)
+ - call_assistant.py : custom SampleAssistant
+ - modify snowboydecoder.py : add restart API for initializing. 
+ 
+#Ref
+apply snowboy https://glrs.github.io/2019-12-17-ga_sdk-voice_rec-RasPi/
+how to restart detector : https://github.com/Kitt-AI/snowboy/issues/12
+
+
 # Google Assistant SDK for devices - Python
 
 This repository contains the [Python][python] packages for the [Google Assistant SDK][google-assistant-sdk].
