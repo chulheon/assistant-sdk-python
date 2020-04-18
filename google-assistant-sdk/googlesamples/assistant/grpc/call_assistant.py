@@ -7,6 +7,10 @@ import pathlib2 as pathlib
 import sys
 import uuid
 
+#JCH
+import subprocess
+import signal
+#
 import click
 import grpc
 import google.auth.transport.grpc
@@ -207,7 +211,7 @@ def main(api_endpoint=ASSISTANT_API_ENDPOINT,
         audio_block_size=audio_helpers.DEFAULT_AUDIO_DEVICE_BLOCK_SIZE,
         audio_flush_size=audio_helpers.DEFAULT_AUDIO_DEVICE_FLUSH_SIZE,
         audio_iter_size=audio_helpers.DEFAULT_AUDIO_ITER_SIZE,
-        lang='en-US',
+        lang='ko-KR',
         verbose=False,
         once=False,
         grpc_deadline=DEFAULT_GRPC_DEADLINE):
@@ -321,6 +325,64 @@ def main(api_endpoint=ASSISTANT_API_ENDPOINT,
 
     device_handler = device_helpers.DeviceRequestHandler(device_id)
 
+    @device_handler.command('action.devices.commands.OnOff')
+    def onoff(on):
+        if on:
+            logging.info('Turning device on')
+            print('JCH MP3 Play')
+            #launch subprocess
+            #python cannot play mp3
+            #subprocess.call(['lxterminal', '-e', 'python runMP3.py'])
+            subprocess.call(['lxterminal', '-e', './runMP3.sh'])
+            print('JCH fork process is run. parent process is still running')
+        else:
+            logging.info('Turning device off')
+            killMP3Pid()
+            print('JCH turn off')
+
+    @device_handler.command('com.example.commands.BlinkLight')
+    def blink(speed, number):
+        logging.info('Blinking device %s times.' % number)
+        delay = 1
+        if speed == "SLOWLY":
+            delay = 2
+        elif speed == "QUICKLY":
+            delay = 0.5
+        for i in range(int(number)):
+            logging.info('Device is blinking.')
+            time.sleep(delay)
+
+    #JCH : get MP3 player pid
+    def killMP3Pid():
+        count = 1
+        pid = -1
+        cmd = ['ps', '-ef']
+
+        fd_popen = subprocess.Popen(cmd, stdout=subprocess.PIPE).stdout
+        for line in fd_popen:
+            if line.find('runMP3') != -1:
+                list = line.split()
+                pid = list[1]
+                print('bash pid:' + str(pid))
+                os.kill(int(pid), signal.SIGTERM) #or signal.SIGKILL
+                break
+        fd_popen.close()
+
+        fd_popen = subprocess.Popen(cmd, stdout=subprocess.PIPE).stdout
+        for line in fd_popen:
+            if line.find('omxplayer') != -1:
+                print('find')
+                list = line.split()
+                pid = list[1]
+                print('pid:' + str(pid))
+                os.kill(int(pid), signal.SIGTERM)
+                if count == 2:
+                    break
+                else:
+                    count = count + 1
+        fd_popen.close()
+    #
+
     with SampleAssistant(lang, device_model_id, device_id,
                          conversation_stream,
                          grpc_channel, grpc_deadline,
@@ -329,6 +391,5 @@ def main(api_endpoint=ASSISTANT_API_ENDPOINT,
         while assistant.assist():
             if once:
                 break
-
     # If you want to control whether the function returned correctly
     # return True
