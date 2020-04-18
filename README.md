@@ -12,6 +12,7 @@
  - demo_assist.py : main loop  (howord detect -> detector terminate -> assistant -> detector restart)
  - call_assistant.py : custom SampleAssistant
  - modify snowboydecoder.py : add restart API for initializing. 
+ - runMP3.sh : play MP3 in local server
  
 #Ref
 apply snowboy https://glrs.github.io/2019-12-17-ga_sdk-voice_rec-RasPi/
